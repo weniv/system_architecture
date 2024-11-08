@@ -893,6 +893,107 @@ class PrototypingTool {
             height: `${element.height}px`,
             zIndex: element.zIndex || 1
         });
+
+        if (element.type === 'line') {
+            // SVG 컨테이너 생성
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            svg.style.position = 'absolute';
+            svg.style.top = '0';
+            svg.style.left = '0';
+            svg.style.overflow = 'visible'; // SVG가 컨테이너를 벗어날 수 있도록 설정
+            
+            // 마커 정의
+            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            
+            // 시작 화살표 마커
+            const startArrowMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            startArrowMarker.setAttribute("id", `start-arrow-${element.id}`);
+            startArrowMarker.setAttribute("viewBox", "0 0 10 10");
+            startArrowMarker.setAttribute("refX", "0");
+            startArrowMarker.setAttribute("refY", "5");
+            startArrowMarker.setAttribute("markerWidth", "6");
+            startArrowMarker.setAttribute("markerHeight", "6");
+            startArrowMarker.setAttribute("orient", "auto-start-reverse");
+            
+            const startArrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            startArrowPath.setAttribute("d", "M 0 5 L 10 0 L 10 10 Z");
+            startArrowPath.setAttribute("fill", element.color || '#000000');
+            
+            startArrowMarker.appendChild(startArrowPath);
+            defs.appendChild(startArrowMarker);
+            
+            // 끝 화살표 마커
+            const endArrowMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            endArrowMarker.setAttribute("id", `end-arrow-${element.id}`);
+            endArrowMarker.setAttribute("viewBox", "0 0 10 10");
+            endArrowMarker.setAttribute("refX", "10");
+            endArrowMarker.setAttribute("refY", "5");
+            endArrowMarker.setAttribute("markerWidth", "6");
+            endArrowMarker.setAttribute("markerHeight", "6");
+            endArrowMarker.setAttribute("orient", "auto");
+            
+            const endArrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            endArrowPath.setAttribute("d", "M 0 0 L 10 5 L 0 10 Z");
+            endArrowPath.setAttribute("fill", element.color || '#000000');
+            
+            endArrowMarker.appendChild(endArrowPath);
+            defs.appendChild(endArrowMarker);
+            
+            svg.appendChild(defs);
+            
+            // 라인 생성
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", "0");
+            line.setAttribute("y1", "50%");
+            line.setAttribute("x2", "100%");
+            line.setAttribute("y2", "50%");
+            line.setAttribute("stroke", element.color || '#000000');
+            line.setAttribute("stroke-width", element.strokeWidth || 2);
+            
+            if (element.strokeStyle === 'dashed') {
+                line.setAttribute("stroke-dasharray", "5,5");
+            } else if (element.strokeStyle === 'dotted') {
+                line.setAttribute("stroke-dasharray", "2,2");
+            }
+            
+            if (element.startArrow === 'arrow') {
+                line.setAttribute("marker-start", `url(#start-arrow-${element.id})`);
+            }
+            if (element.endArrow === 'arrow') {
+                line.setAttribute("marker-end", `url(#end-arrow-${element.id})`);
+            }
+            
+            svg.appendChild(line);
+            
+            // 핸들 추가
+            const startHandle = document.createElement('div');
+            startHandle.className = 'line-handle start';
+            startHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.startDraggingLineHandle(e, element, 'start');
+            });
+            
+            const endHandle = document.createElement('div');
+            endHandle.className = 'line-handle end';
+            endHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.startDraggingLineHandle(e, element, 'end');
+            });
+            
+            // 라인 영역 클릭 이벤트 처리
+            div.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('line-handle')) {
+                    e.stopPropagation();
+                    this.selectElement(element);
+                }
+            });
+            
+            div.appendChild(svg);
+            div.appendChild(startHandle);
+            div.appendChild(endHandle);
+        }
     
         // 요소 타입별 렌더링
         const elementContent = {
@@ -1043,76 +1144,6 @@ class PrototypingTool {
             
                 container.appendChild(table);
                 return container;
-            },
-
-            line: () => {
-                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                svg.style.width = '100%';
-                svg.style.height = '100%';
-                svg.style.position = 'absolute';
-                svg.style.top = '0';
-                svg.style.left = '0';
-                
-                // 마커 정의
-                const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-                
-                // 화살표 마커
-                const arrowMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-                arrowMarker.setAttribute("id", `arrow-${element.id}`);
-                arrowMarker.setAttribute("viewBox", "0 0 10 10");
-                arrowMarker.setAttribute("refX", "10");
-                arrowMarker.setAttribute("refY", "5");
-                arrowMarker.setAttribute("markerWidth", "6");
-                arrowMarker.setAttribute("markerHeight", "6");
-                arrowMarker.setAttribute("orient", "auto");
-                
-                const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                arrowPath.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
-                arrowPath.setAttribute("fill", element.color || '#000000');
-                
-                arrowMarker.appendChild(arrowPath);
-                defs.appendChild(arrowMarker);
-                svg.appendChild(defs);
-                
-                // 라인 생성
-                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute("x1", "0");
-                line.setAttribute("y1", "0");
-                line.setAttribute("x2", "100%");
-                line.setAttribute("y2", "100%");
-                line.setAttribute("stroke", element.color || '#000000');
-                line.setAttribute("stroke-width", element.strokeWidth || 2);
-                
-                if (element.strokeStyle === 'dashed') {
-                    line.setAttribute("stroke-dasharray", "5,5");
-                } else if (element.strokeStyle === 'dotted') {
-                    line.setAttribute("stroke-dasharray", "2,2");
-                }
-                
-                if (element.startArrow === 'arrow') {
-                    line.setAttribute("marker-start", `url(#arrow-${element.id})`);
-                }
-                if (element.endArrow === 'arrow') {
-                    line.setAttribute("marker-end", `url(#arrow-${element.id})`);
-                }
-                
-                svg.appendChild(line);
-                
-                // 핸들 추가
-                const startHandle = document.createElement('div');
-                startHandle.className = 'line-handle start';
-                const endHandle = document.createElement('div');
-                endHandle.className = 'line-handle end';
-                
-                const container = document.createElement('div');
-                container.style.width = '100%';
-                container.style.height = '100%';
-                container.style.position = 'relative';
-                container.appendChild(svg);
-                container.appendChild(startHandle);
-                container.appendChild(endHandle);
-                
-                return container;
             }
             
         };
@@ -1137,6 +1168,44 @@ class PrototypingTool {
     
         document.getElementById('canvas').appendChild(div);
         this.updateLayersList();
+    }
+
+    startDraggingLineHandle(e, element, handle) {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const canvas = document.getElementById('canvas');
+        const canvasRect = canvas.getBoundingClientRect();
+        const elementDiv = document.getElementById(`element-${element.id}`);
+        const elementRect = elementDiv.getBoundingClientRect();
+        
+        const moveHandle = (e) => {
+            const x = ((e.clientX - canvasRect.left - this.canvasOffset.x) / this.scale) - element.x;
+            const y = ((e.clientY - canvasRect.top - this.canvasOffset.y) / this.scale) - element.y;
+            
+            const line = elementDiv.querySelector('line');
+            if (handle === 'start') {
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', y);
+            } else {
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', y);
+            }
+            
+            // 핸들 위치 업데이트
+            const handleDiv = elementDiv.querySelector(`.line-handle.${handle}`);
+            handleDiv.style.left = `${x - 5}px`;
+            handleDiv.style.top = `${y - 5}px`;
+        };
+        
+        const stopHandle = () => {
+            document.removeEventListener('mousemove', moveHandle);
+            document.removeEventListener('mouseup', stopHandle);
+            this.saveHistory();
+        };
+        
+        document.addEventListener('mousemove', moveHandle);
+        document.addEventListener('mouseup', stopHandle);
     }
 
     startEditing(element) {

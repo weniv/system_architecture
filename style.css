@@ -1183,7 +1183,8 @@ h2 {
     padding: 0;
     border: none;
     background: transparent;
-    pointer-events: none; /* 선 자체는 이벤트를 받지 않음 */
+    pointer-events: all;
+    position: absolute;
 }
 
 .line-handle {
@@ -1194,17 +1195,19 @@ h2 {
     border: 2px solid #2196f3;
     border-radius: 50%;
     cursor: move;
-    pointer-events: all; /* 핸들은 이벤트를 받음 */
+    pointer-events: all;
+    z-index: 1;
+    transform: translate(-50%, -50%);
 }
 
 .line-handle.start {
-    top: -5px;
-    left: -5px;
+    left: 0;
+    top: 50%;
 }
 
 .line-handle.end {
-    bottom: -5px;
-    right: -5px;
+    right: 0;   
+    top: 50%;
 }
 
 .line-controls {
