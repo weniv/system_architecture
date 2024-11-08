@@ -1,0 +1,1266 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.toolbar {
+    padding: 8px;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toolbar button,
+.toolbar select {
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.toolbar button:hover {
+    background: #f5f5f5;
+}
+
+.main-container {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.components-panel {
+    width: 200px;
+    background: #f5f5f5;
+    padding: 16px;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.components-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.component-btn {
+    padding: 8px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.component-btn:hover {
+    background: #f5f5f5;
+}
+
+.canvas-area {
+    flex: 1;
+    background: #e0e0e0;
+    overflow: auto;
+    position: relative;
+    cursor: default;
+}
+
+.canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    transform-origin: 0 0;
+    transition: width 0.3s, height 0.3s;
+    background-image: 
+        linear-gradient(90deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px)),
+        linear-gradient(0deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px));
+    background-size: 20px 20px;
+}
+
+/* 패닝 중일 때의 커서 스타일 */
+.canvas-area.panning {
+    cursor: grab;
+}
+
+.canvas-area.panning:active {
+    cursor: grabbing;
+}
+
+.properties-panel {
+    width: 250px;
+    background: #f5f5f5;
+    padding: 16px;
+    border-left: 1px solid #ddd;
+    overflow-y: auto;
+}
+
+.element {
+    position: absolute;
+    background: white;
+    /* border: 1px solid #ddd; */
+    /* border-radius: 4px; */
+    padding: 8px;
+    cursor: move;
+    user-select: none;
+    min-width: 50px;
+    min-height: 30px;
+}
+
+.element.selected {
+    border: 2px solid #2196f3;
+}
+
+.element.button {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #2196f3;
+    color: white;
+    text-align: center;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.element.input {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* .element.text {
+    background: transparent;
+    border: none;
+} */
+
+.resize-handle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border: 1px solid #2196f3;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.resize-handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
+.resize-handle.n { top: -4px; left: 50%; margin-left: -4px; cursor: n-resize; }
+.resize-handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
+.resize-handle.w { top: 50%; left: -4px; margin-top: -4px; cursor: w-resize; }
+.resize-handle.e { top: 50%; right: -4px; margin-top: -4px; cursor: e-resize; }
+.resize-handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+.resize-handle.s { bottom: -4px; left: 50%; margin-left: -4px; cursor: s-resize; }
+.resize-handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
+
+.property-group {
+    margin-bottom: 16px;
+}
+
+.property-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.property-input {
+    margin: 0;
+    padding: 8px;
+    height: 30px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.layers-list {
+    margin-top: 16px;
+}
+
+.layer-item {
+    padding: 8px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.layer-item.selected {
+    background: #e3f2fd;
+}
+
+h2 {
+    margin-bottom: 16px;
+}
+
+.layer-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+
+.layer-controls button {
+    padding: 4px 8px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.layer-controls button:hover {
+    background: #f5f5f5;
+}
+
+.font-size-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.font-size-controls button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.font-size-controls button:hover {
+    background: #f5f5f5;
+}
+
+.font-size-controls input {
+    width: 60px;
+    text-align: center;
+}
+
+.element.panel {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    /* overflow: hidden; */
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    cursor: move;
+}
+
+.panel-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.panel-close {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    border-radius: 50%;
+}
+
+.panel-close:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.panel-content {
+    flex: 1;
+    padding: 8px;
+    overflow: auto;
+}
+
+.element.panel.selected {
+    border: 2px solid #2196f3;
+}
+
+.color-controls {
+    display: grid;
+    gap: 8px;
+}
+
+.color-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.color-control label {
+    font-size: 12px;
+    color: #666;
+}
+
+.color-control input[type="color"] {
+    width: 40px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.snap-guide {
+    position: absolute;
+    background-color: #2196f3;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9999;
+    will-change: transform; /* 성능 최적화 */
+    animation: snapGuideAppear 1s ease-out;
+}
+
+@keyframes snapGuideAppear {
+    0% { opacity: 0; }
+    20% { opacity: 0.8; }
+    80% { opacity: 0.8; }
+    100% { opacity: 0; }
+}
+
+/* .editable-text {
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: text;
+} */
+
+/* .element.text {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+} */
+
+.text-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.style-button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.style-button:hover {
+    background: #f5f5f5;
+}
+
+.style-button.active {
+    background: #e3f2fd;
+    border-color: #2196f3;
+    color: #2196f3;
+}
+
+.element.sticky {
+    background-color: #fff740;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+    transform: rotate(-1deg);
+    padding: 16px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    border-radius: 4px;
+}
+
+.sticky-content {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.sticky-content.editable {
+    outline: none;
+    padding: 4px;
+}
+
+.sticky-colors {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.color-button {
+    width: 24px;
+    height: 24px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+}
+
+.color-button.active {
+    border-color: #2196f3;
+}
+
+.color-button:hover {
+    transform: scale(1.1);
+}
+
+.element.image {
+    /* overflow: hidden; */
+    background: #fff;
+    padding: 0;
+}
+
+.element.image img {
+    pointer-events: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.image-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.image-dialog-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.image-input-group {
+    margin: 15px 0;
+}
+
+.image-input-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.image-input-group input {
+    width: 100%;
+    margin-bottom: 5px;
+    padding: 8px;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.image-dialog button {
+    padding: 8px 16px;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.image-dialog button,
+.icon-dialog button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    background: #2196f3;
+    color: white;
+    min-width: 80px;
+}
+
+/* 취소 버튼 스타일 */
+.image-dialog button.cancel-btn,
+.icon-dialog button.cancel-btn {
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+/* 호버 효과 */
+.image-dialog button:hover,
+.icon-dialog button:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 취소 버튼 호버 효과 */
+.image-dialog button.cancel-btn:hover,
+.icon-dialog button.cancel-btn:hover {
+    background: #e8e8e8;
+}
+
+.element.box {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 0;
+    overflow: visible;
+    /* overflow: hidden; */
+}
+
+.box-placeholder {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.box-placeholder svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.box-placeholder.hide-x svg {
+    display: none;
+}
+
+/* X 표시 라인 스타일 */
+.box-placeholder svg line {
+    transition: stroke 0.3s ease;
+}
+
+.checkbox-control {
+    margin-top: 8px;
+}
+
+.checkbox-control label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.checkbox-control input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.box-placeholder.hide-x svg {
+    display: none;
+}
+
+.box-placeholder svg line {
+    transition: stroke 0.3s;
+}
+
+.sticky-controls {
+    margin-top: 12px;
+}
+
+.control-group {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-group label {
+    min-width: 70px;
+    font-size: 12px;
+    color: #666;
+}
+
+.radius-slider {
+    flex: 1;
+    height: 4px;
+}
+
+.opacity-slider {
+    flex: 1;
+}
+
+.font-size-input {
+    width: 60px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.control-group span {
+    min-width: 30px;
+    font-size: 12px;
+    color: #666;
+    text-align: right;
+}
+
+.shortcut-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+/* 닫기 버튼 스타일 */
+.shortcut-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.shortcut-close:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.shortcut-content {
+    position: relative;  /* 추가: 닫기 버튼의 기준점 */
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    min-width: 600px;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.shortcut-section {
+    margin-bottom: 20px;
+}
+
+.shortcut-section h3 {
+    margin-bottom: 12px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.shortcut-list {
+    display: grid;
+    gap: 8px;
+}
+
+.shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.shortcut-keys {
+    display: flex;
+    gap: 4px;
+}
+
+.key {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    font-family: monospace;
+    font-size: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.shortcut-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+}
+
+.shortcut-close:hover {
+    color: #333;
+}
+
+.layer-item {
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.layer-info {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.layer-name {
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.layer-type {
+    color: #666;
+    font-size: 0.8em;
+}
+
+.layer-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.layer-actions button {
+    padding: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.layer-actions button:hover {
+    opacity: 1;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    background: #f5f5f5;
+    border-right: 1px solid #ddd;
+    height: 100%;  /* 전체 높이 사용 */
+}
+
+.pages-panel {
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    height: 30%;  /* 왼쪽 패널의 50% 높이 사용 */
+}
+
+.pages-panel .panel-header {
+    padding: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ddd;
+    flex-shrink: 0;  /* 헤더 크기 고정 */
+}
+
+.pages-list {
+    padding: 16px;
+    padding-top: 8px;
+    overflow-y: auto;  /* 스크롤 추가 */
+    flex: 1;  /* 남은 공간 차지 */
+}
+
+.components-panel {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;  /* 남은 공간 차지 */
+}
+
+/* 스크롤바 스타일링 (pages-list와 components-panel 모두 적용) */
+.pages-list::-webkit-scrollbar,
+.components-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pages-list::-webkit-scrollbar-track,
+.components-panel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.pages-list::-webkit-scrollbar-thumb,
+.components-panel::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.pages-list::-webkit-scrollbar-thumb:hover,
+.components-panel::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.pages-list {
+    margin-top: 8px;
+}
+
+.page-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 4px 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.page-item.active {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.page-item .page-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.page-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+}
+
+.page-item:hover .page-actions {
+    opacity: 1;
+}
+
+.page-actions button {
+    padding: 2px 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.pages-panel .panel-header {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.pages-panel .panel-header h2 {
+    margin: 0;
+}
+
+.pages-panel .panel-header button {
+    padding: 6px 12px;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pages-panel .panel-header button:hover {
+    background: #1976d2;
+}
+
+.element.link {
+    background: rgba(33, 150, 243, 0.15);
+    border: 2px dashed #2196f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+ }
+
+.element.link:hover {
+    background: rgba(33, 150, 243, 0.3);
+}
+
+.preview-mode .element.link {
+    background: transparent;
+    border: none;
+}
+
+.preview-mode .element.link:hover {
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.preview-mode .element.link .link-content {
+    opacity: 0;
+}
+
+.preview-mode .element.link:hover .link-content {
+    opacity: 0.7;
+}
+
+.text-align-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.text-align-controls .style-button {
+    font-size: 16px;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+}
+
+.element.text {
+    cursor: pointer;
+    /* display: flex와 align-items 제거 */
+    padding: 0; /* padding을 0으로 설정 */
+    text-align: inherit; /* 부모로부터 정렬 상속 */
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.editable-text {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    text-align: inherit; /* 부모로부터 정렬 상속 */
+    padding: 8px; /* 패딩은 여기서 설정 */
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+}
+
+.box-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.icon-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.icon-dialog-content {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    min-width: 600px;
+    max-width: 800px;
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.icon-item {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.icon-item:hover {
+    background: #f5f5f5;
+}
+
+.icon-preview {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-name {
+    font-size: 12px;
+    margin-top: 4px;
+    color: #666;
+}
+
+.element.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.icon-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-wrapper svg {
+    width: 100%;
+    height: 100%;
+}
+
+.icon-colors {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.color-button {
+    width: 24px;
+    height: 24px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+}
+
+.color-button.active {
+    border-color: #2196f3;
+}
+
+.color-button:hover {
+    transform: scale(1.1);
+}
+
+/* 캔버스 영역 스크롤바 스타일링 */
+.canvas-area::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;  /* 수평 스크롤바 높이 */
+}
+
+.canvas-area::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.canvas-area::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.canvas-area::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 스크롤바 코너 스타일링 */
+.canvas-area::-webkit-scrollbar-corner {
+    background: #f1f1f1;
+}
+
+/* 모바일 오버레이 스타일 */
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.mobile-message {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-message h2 {
+    color: #ff4444;
+    margin-bottom: 16px;
+    font-size: 1.5em;
+}
+
+.mobile-message p {
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.5;
+    font-size: 1.1em;
+}
+
+.mobile-close-btn {
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 1.1em;
+    margin-top: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.mobile-close-btn:hover {
+    background: #1976d2;
+}
+
+/* 모바일 환경에서 버튼 터치 영역 확대 */
+@media (max-width: 768px) {
+    .mobile-close-btn {
+        padding: 16px 32px;
+        font-size: 1.2em;
+    }
+}
+
+.element.line {
+    padding: 0;
+    border: none;
+    background: transparent;
+    pointer-events: none; /* 선 자체는 이벤트를 받지 않음 */
+}
+
+.line-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border: 2px solid #2196f3;
+    border-radius: 50%;
+    cursor: move;
+    pointer-events: all; /* 핸들은 이벤트를 받음 */
+}
+
+.line-handle.start {
+    top: -5px;
+    left: -5px;
+}
+
+.line-handle.end {
+    bottom: -5px;
+    right: -5px;
+}
+
+.line-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.line-style-preview {
+    display: flex;
+    gap: 8px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.line-style-option {
+    width: 60px;
+    height: 30px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.line-style-option:hover {
+    background: #f5f5f5;
+}
+
+.line-style-option.active {
+    border-color: #2196f3;
+    background: #e3f2fd;
+}
+
+.arrow-style-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.arrow-style-option {
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.arrow-style-option:hover {
+    background: #f5f5f5;
+}
+
+.arrow-style-option.active {
+    border-color: #2196f3;
+    background: #e3f2fd;
+}
