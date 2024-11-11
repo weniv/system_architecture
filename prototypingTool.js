@@ -153,13 +153,6 @@ class PrototypingTool {
         }
     }
 
-    // transform 원점 유지
-    updateCanvasTransform() {
-        const canvas = document.getElementById('canvas');
-        canvas.style.transform = `translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px) scale(${this.scale})`;
-        canvas.style.transformOrigin = '0 0';
-    }
-
     createPage(pageName) {
         const pageId = Date.now();
         const page = {
@@ -364,17 +357,6 @@ class PrototypingTool {
     resetZoom() {
         this.scale = 1;
         this.canvasOffset = { x: 0, y: 0 };
-        this.updateCanvasTransform();
-    }
-    
-    handlePan = (e) => {
-        const dx = e.clientX - this.lastPanPosition.x;
-        const dy = e.clientY - this.lastPanPosition.y;
-    
-        this.canvasOffset.x += dx;
-        this.canvasOffset.y += dy;
-    
-        this.lastPanPosition = { x: e.clientX, y: e.clientY };
         this.updateCanvasTransform();
     }
     
@@ -605,7 +587,6 @@ class PrototypingTool {
                         (type === 'panel' ? '#ffffff' : undefined),
             borderColor: type === 'box' ? '#dddddd' : 
                         (type === 'panel' ? '#dddddd' : undefined),
-            showX: type === 'box' ? true : undefined,
             radius: type === 'box' ? 0 : undefined,
             headerColor: type === 'panel' ? '#f5f5f5' : undefined,
             isPanel: type === 'panel',
@@ -1022,16 +1003,10 @@ class PrototypingTool {
                 innerContainer.style.left = '0';
                 
                 const placeholder = document.createElement('div');
-                placeholder.className = `box-placeholder ${element.showX ? '' : 'hide-x'}`;
+                placeholder.className = `box-placeholder`;
                 placeholder.style.width = '100%';
                 placeholder.style.height = '100%';
                 placeholder.style.position = 'relative';
-                placeholder.innerHTML = `
-                    <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
-                        <line x1="0" y1="0" x2="100%" y2="100%" stroke="#ddd" stroke-width="1"/>
-                        <line x1="100%" y1="0" x2="0" y2="100%" stroke="#ddd" stroke-width="1"/>
-                    </svg>
-                `;
                 
                 innerContainer.appendChild(placeholder);
                 
@@ -1649,14 +1624,6 @@ class PrototypingTool {
                                 onchange="tool.updateBoxStyle('radius', this.value)"
                                 class="radius-slider">
                             <span>${element.radius || 0}px</span>
-                        </div>
-                        <div class="checkbox-control">
-                            <label>
-                                <input type="checkbox" 
-                                    ${element.showX ? 'checked' : ''}
-                                    onchange="tool.updateBoxStyle('showX', this.checked)">
-                                Show X Mark
-                            </label>
                         </div>
                     </div>
                 `,
@@ -2387,13 +2354,6 @@ class PrototypingTool {
                 const lines = elementDiv.querySelectorAll('line');
                 lines.forEach(line => line.setAttribute('stroke', value));
                 break;
-                
-            case 'showX':
-                const placeholder = elementDiv.querySelector('.box-placeholder');
-                if (placeholder) {
-                    placeholder.classList.toggle('hide-x', !value);
-                }
-                break;
     
             case 'radius':
                 innerContainer.style.borderRadius = `${processedValue}px`;
@@ -2402,16 +2362,6 @@ class PrototypingTool {
         
         this.saveHistory();
         this.updateProperties();
-    }
-
-    updateBoxColor(color) {
-        if (!this.selectedElement || this.selectedElement.type !== 'box') return;
-        
-        this.selectedElement.backgroundColor = color;
-        const elementDiv = document.getElementById(`element-${this.selectedElement.id}`);
-        elementDiv.style.backgroundColor = color;
-        
-        this.saveHistory();
     }
 
     updateStickyColor(color) {

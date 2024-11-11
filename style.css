@@ -566,39 +566,6 @@ h2 {
     pointer-events: none;
 }
 
-.box-placeholder.hide-x svg {
-    display: none;
-}
-
-/* X 표시 라인 스타일 */
-.box-placeholder svg line {
-    transition: stroke 0.3s ease;
-}
-
-.checkbox-control {
-    margin-top: 8px;
-}
-
-.checkbox-control label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.checkbox-control input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-}
-
-.box-placeholder.hide-x svg {
-    display: none;
-}
-
-.box-placeholder svg line {
-    transition: stroke 0.3s;
-}
-
 .sticky-controls {
     margin-top: 12px;
 }
