@@ -580,7 +580,8 @@ class PrototypingTool {
                 (type === 'panel' ? '' : type.charAt(0).toUpperCase() + type.slice(1)))),
             iconColor: type === 'icon' ? this.iconColors[0] : undefined,
             zIndex: this.maxZIndex,
-            opacity: type === 'sticky' ? 1 : undefined,
+            opacity: type === 'sticky' ? 1 : 
+                (type === 'box' ? 1 : undefined),
             fontSize: type === 'text' ? 16 : undefined,
             // 패널의 기본 색상 설정
             backgroundColor: type === 'box' ? '#ffffff' : 
@@ -1625,6 +1626,18 @@ class PrototypingTool {
                                 class="radius-slider">
                             <span>${element.radius || 0}px</span>
                         </div>
+                        <div class="control-group">
+                            <label>Opacity</label>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="1" 
+                                step="0.1" 
+                                value="${element.opacity}"
+                                onchange="tool.updateBoxStyle('opacity', this.value)"
+                                class="opacity-slider">
+                            <span>${Math.round(element.opacity * 100)}%</span>
+                        </div>
                     </div>
                 `,
                 handler: 'updateBoxStyle'
@@ -2338,11 +2351,12 @@ class PrototypingTool {
     updateBoxStyle(property, value) {
         if (!this.selectedElement || this.selectedElement.type !== 'box') return;
         
-        const processedValue = property === 'radius' ? parseInt(value) : value;
+        const processedValue = property === 'opacity' ? parseFloat(value) : 
+                              property === 'radius' ? parseInt(value) : value;
         this.selectedElement[property] = processedValue;
         
         const elementDiv = document.getElementById(`element-${this.selectedElement.id}`);
-        const innerContainer = elementDiv.children[0];  // 내부 컨테이너 참조
+        const innerContainer = elementDiv.children[0];
         
         switch (property) {
             case 'backgroundColor':
@@ -2351,12 +2365,14 @@ class PrototypingTool {
                 
             case 'borderColor':
                 innerContainer.style.borderColor = value;
-                const lines = elementDiv.querySelectorAll('line');
-                lines.forEach(line => line.setAttribute('stroke', value));
                 break;
-    
+        
             case 'radius':
                 innerContainer.style.borderRadius = `${processedValue}px`;
+                break;
+    
+            case 'opacity':
+                innerContainer.style.opacity = processedValue;
                 break;
         }
         
