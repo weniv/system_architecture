@@ -3,3 +3,4 @@
 
 ## 아이콘 출처
 * AWS: https://aws-icons.com/
+* AWS icons: https://aws.amazon.com/ko/architecture/icons/
