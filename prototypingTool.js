@@ -693,7 +693,12 @@ class PrototypingTool {
                 <div class="icon-grid">
                     ${iconList}
                 </div>
-                <div class="dialog-buttons">
+                <div class="dialog-footer">
+                    <div class="source-info">
+                        Icons from: 
+                        <a href="https://aws-icons.com/" target="_blank" rel="noopener noreferrer">AWS Icons</a>,
+                        <a href="https://aws.amazon.com/ko/architecture/icons/" target="_blank" rel="noopener noreferrer">AWS</a>
+                    </div>
                     <button class="cancel-btn">Cancel</button>
                 </div>
             </div>
