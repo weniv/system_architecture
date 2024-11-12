@@ -1164,7 +1164,7 @@ h2 {
     cursor: move;
     pointer-events: all;
     z-index: 1;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); /* 핸들을 중앙에 위치시키기 위한 transform */
 }
 
 .line-handle.start {

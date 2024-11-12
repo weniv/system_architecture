@@ -558,6 +558,33 @@ class PrototypingTool {
             this.addTableElement();
             return;
         }
+        if (type === 'line') {
+            const element = {
+                id: Date.now(),
+                type: 'line',
+                x: 100,
+                y: 100,
+                width: 200,
+                height: 2,
+                x1: 0,               // 시작점 x 좌표
+                y1: 1,               // 시작점 y 좌표
+                x2: 200,             // 끝점 x 좌표
+                y2: 1,               // 끝점 y 좌표
+                name: this.generateElementName('line'),
+                zIndex: this.maxZIndex,
+                strokeWidth: 2,
+                strokeStyle: 'solid',
+                startArrow: 'none',
+                endArrow: 'none',
+                color: '#000000'
+            };
+        
+            this.elements.push(element);
+            this.renderElement(element);
+            this.selectElement(element);
+            this.saveHistory();
+            return;
+        }
         const element = {
             id: Date.now(),
             type,
@@ -884,7 +911,7 @@ class PrototypingTool {
             svg.style.position = 'absolute';
             svg.style.top = '0';
             svg.style.left = '0';
-            svg.style.overflow = 'visible'; // SVG가 컨테이너를 벗어날 수 있도록 설정
+            svg.style.overflow = 'visible';
             
             // 마커 정의
             const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
@@ -893,14 +920,14 @@ class PrototypingTool {
             const startArrowMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
             startArrowMarker.setAttribute("id", `start-arrow-${element.id}`);
             startArrowMarker.setAttribute("viewBox", "0 0 10 10");
-            startArrowMarker.setAttribute("refX", "0");
+            startArrowMarker.setAttribute("refX", "10"); // refX 값을 10으로 변경
             startArrowMarker.setAttribute("refY", "5");
             startArrowMarker.setAttribute("markerWidth", "6");
             startArrowMarker.setAttribute("markerHeight", "6");
             startArrowMarker.setAttribute("orient", "auto-start-reverse");
             
             const startArrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            startArrowPath.setAttribute("d", "M 0 5 L 10 0 L 10 10 Z");
+            startArrowPath.setAttribute("d", "M 10 5 L 0 0 L 0 10 Z");
             startArrowPath.setAttribute("fill", element.color || '#000000');
             
             startArrowMarker.appendChild(startArrowPath);
@@ -927,10 +954,10 @@ class PrototypingTool {
             
             // 라인 생성
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", "0");
-            line.setAttribute("y1", "50%");
-            line.setAttribute("x2", "100%");
-            line.setAttribute("y2", "50%");
+            line.setAttribute("x1", element.x1 || 0);
+            line.setAttribute("y1", element.y1 || element.height/2);
+            line.setAttribute("x2", element.x2 || element.width);
+            line.setAttribute("y2", element.y2 || element.height/2);
             line.setAttribute("stroke", element.color || '#000000');
             line.setAttribute("stroke-width", element.strokeWidth || 2);
             
@@ -940,6 +967,7 @@ class PrototypingTool {
                 line.setAttribute("stroke-dasharray", "2,2");
             }
             
+            // 화살표 마커 적용 (항상 마커를 생성하고, visibility로 제어)
             if (element.startArrow === 'arrow') {
                 line.setAttribute("marker-start", `url(#start-arrow-${element.id})`);
             }
@@ -948,35 +976,57 @@ class PrototypingTool {
             }
             
             svg.appendChild(line);
+            div.appendChild(svg);
+        
+            // 핸들 생성 함수
+            const createHandles = () => {
+                // 기존 핸들 제거
+                div.querySelectorAll('.line-handle').forEach(handle => handle.remove());
+                
+                const startHandle = document.createElement('div');
+                startHandle.className = 'line-handle start';
+                startHandle.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    this.startDraggingLineHandle(e, element, 'start');
+                });
+                
+                const endHandle = document.createElement('div');
+                endHandle.className = 'line-handle end';
+                endHandle.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    this.startDraggingLineHandle(e, element, 'end');
+                });
+                
+                div.appendChild(startHandle);
+                div.appendChild(endHandle);
+                
+                // 핸들 위치 업데이트
+                const lineEl = div.querySelector('line');
+                const x1 = parseFloat(lineEl.getAttribute('x1')) || 0;
+                const y1 = parseFloat(lineEl.getAttribute('y1')) || element.height / 2;
+                const x2 = parseFloat(lineEl.getAttribute('x2')) || element.width;
+                const y2 = parseFloat(lineEl.getAttribute('y2')) || element.height / 2;
+                
+                startHandle.style.left = `${x1}px`;
+                startHandle.style.top = `${y1}px`;
+                endHandle.style.left = `${x2}px`;
+                endHandle.style.top = `${y2}px`;
+            };
+        
+            // 선택된 상태라면 핸들 추가
+            if (this.selectedElement === element) {
+                createHandles();
+            }
             
-            // 핸들 추가
-            const startHandle = document.createElement('div');
-            startHandle.className = 'line-handle start';
-            startHandle.addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-                this.startDraggingLineHandle(e, element, 'start');
-            });
-            
-            const endHandle = document.createElement('div');
-            endHandle.className = 'line-handle end';
-            endHandle.addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-                this.startDraggingLineHandle(e, element, 'end');
-            });
-            
-            // 라인 영역 클릭 이벤트 처리
+            // 클릭 이벤트 처리
             div.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('line-handle')) {
                     e.stopPropagation();
                     this.selectElement(element);
                 }
             });
-            
-            div.appendChild(svg);
-            div.appendChild(startHandle);
-            div.appendChild(endHandle);
         }
-    
+
         // 요소 타입별 렌더링
         const elementContent = {
             image: () => {
@@ -1150,28 +1200,33 @@ class PrototypingTool {
         e.stopPropagation();
         e.preventDefault();
         
-        const canvas = document.getElementById('canvas');
-        const canvasRect = canvas.getBoundingClientRect();
         const elementDiv = document.getElementById(`element-${element.id}`);
-        const elementRect = elementDiv.getBoundingClientRect();
+        const line = elementDiv.querySelector('line');
+        const rect = elementDiv.getBoundingClientRect();
         
         const moveHandle = (e) => {
-            const x = ((e.clientX - canvasRect.left - this.canvasOffset.x) / this.scale) - element.x;
-            const y = ((e.clientY - canvasRect.top - this.canvasOffset.y) / this.scale) - element.y;
+            const x = ((e.clientX - rect.left) / this.scale);
+            const y = ((e.clientY - rect.top) / this.scale);
             
-            const line = elementDiv.querySelector('line');
             if (handle === 'start') {
                 line.setAttribute('x1', x);
                 line.setAttribute('y1', y);
+                element.x1 = x;
+                element.y1 = y;
+                
+                const startHandle = elementDiv.querySelector('.line-handle.start');
+                startHandle.style.left = `${x}px`;
+                startHandle.style.top = `${y}px`;
             } else {
                 line.setAttribute('x2', x);
                 line.setAttribute('y2', y);
+                element.x2 = x;
+                element.y2 = y;
+                
+                const endHandle = elementDiv.querySelector('.line-handle.end');
+                endHandle.style.left = `${x}px`;
+                endHandle.style.top = `${y}px`;
             }
-            
-            // 핸들 위치 업데이트
-            const handleDiv = elementDiv.querySelector(`.line-handle.${handle}`);
-            handleDiv.style.left = `${x - 5}px`;
-            handleDiv.style.top = `${y - 5}px`;
         };
         
         const stopHandle = () => {
@@ -1417,20 +1472,54 @@ class PrototypingTool {
     }
 
     selectElement(element) {
-        this.clearSelection();  // 먼저 이전 선택을 모두 해제
+        this.clearSelection();
         this.selectedElement = element;
+        
         const div = document.getElementById(`element-${element.id}`);
-        div.classList.add('selected');  // 현재 요소에 'selected' 클래스 추가
+        if (!div) return;
+        
+        div.classList.add('selected');
+
+        if (element.type === 'line') {
+            const startHandle = document.createElement('div');
+            startHandle.className = 'line-handle start';
+            startHandle.style.left = `${element.x1 || 0}px`;
+            startHandle.style.top = `${element.y1 || element.height/2}px`;
+            startHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.startDraggingLineHandle(e, element, 'start');
+            });
+            
+            const endHandle = document.createElement('div');
+            endHandle.className = 'line-handle end';
+            endHandle.style.left = `${element.x2 || element.width}px`;
+            endHandle.style.top = `${element.y2 || element.height/2}px`;
+            endHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.startDraggingLineHandle(e, element, 'end');
+            });
+            
+            div.appendChild(startHandle);
+            div.appendChild(endHandle);
+        } else {
+            this.addResizeHandles(div);
+        }
+                
         this.updateProperties();
         this.updateLayersList();
-        this.addResizeHandles(div);  // 필요한 경우 리사이즈 핸들 추가
     }
 
     addResizeHandles(elementDiv) {
         // 기존 핸들 제거
         elementDiv.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
-
-        // 8방향 리사이즈 핸들 추가
+    
+        const element = this.selectedElement;
+        if (!element) return;
+    
+        // line 타입인 경우 리사이즈 핸들을 추가하지 않음
+        if (element.type === 'line') return;
+    
+        // 다른 요소들에 대한 8방향 리사이즈 핸들 추가
         const positions = ['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se'];
         positions.forEach(pos => {
             const handle = document.createElement('div');
@@ -1916,15 +2005,11 @@ class PrototypingTool {
     updateLineStyle(property, value) {
         if (!this.selectedElement || this.selectedElement.type !== 'line') return;
         
-        if (property === 'strokeWidth') {
-            value = parseInt(value);
-        }
+        const element = this.selectedElement;
+        element[property] = value;
         
-        this.selectedElement[property] = value;
-        
-        const elementDiv = document.getElementById(`element-${this.selectedElement.id}`);
+        const elementDiv = document.getElementById(`element-${element.id}`);
         const line = elementDiv.querySelector('line');
-        const markers = elementDiv.querySelectorAll('marker path');
         
         switch(property) {
             case 'strokeStyle':
@@ -1938,27 +2023,29 @@ class PrototypingTool {
                 break;
                 
             case 'strokeWidth':
-                line.setAttribute('stroke-width', value);
+                line.setAttribute('stroke-width', parseInt(value));
                 break;
                 
             case 'startArrow':
-                if (value === 'none') {
-                    line.removeAttribute('marker-start');
+                if (value === 'arrow') {
+                    line.setAttribute('marker-start', `url(#start-arrow-${element.id})`);
                 } else {
-                    line.setAttribute('marker-start', `url(#arrow-${this.selectedElement.id})`);
+                    line.removeAttribute('marker-start');
                 }
                 break;
                 
             case 'endArrow':
-                if (value === 'none') {
-                    line.removeAttribute('marker-end');
+                if (value === 'arrow') {
+                    line.setAttribute('marker-end', `url(#end-arrow-${element.id})`);
                 } else {
-                    line.setAttribute('marker-end', `url(#arrow-${this.selectedElement.id})`);
+                    line.removeAttribute('marker-end');
                 }
                 break;
                 
             case 'color':
                 line.setAttribute('stroke', value);
+                // 화살표 색상도 업데이트
+                const markers = elementDiv.querySelectorAll('marker path');
                 markers.forEach(marker => marker.setAttribute('fill', value));
                 break;
         }
@@ -2551,7 +2638,7 @@ class PrototypingTool {
     clearSelection() {
         document.querySelectorAll('.element.selected').forEach((el) => {
             el.classList.remove('selected');
-            el.querySelectorAll('.resize-handle').forEach(handle => handle.remove());  // 리사이즈 핸들 제거
+            el.querySelectorAll('.resize-handle, .line-handle').forEach(handle => handle.remove());
         });
         this.selectedElement = null;
         this.updateProperties();
